@@ -1,10 +1,9 @@
-import logo from './logo.svg';
 import './App.css';
 import React, { useRef } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import Webcam from 'react-webcam';
-
+import { drawKeypoint, drawKeypoints, drawSkeleton } from "./utilities";
 
 function App() {
   const webcamRef = useRef(null);
@@ -32,7 +31,18 @@ function App() {
 
       const pose = await net.estimateSinglePose(video);
       console.log(pose);
+
+      drawCanvas(pose, video, videoWidth, videoHeight, canvasRef);
     }
+  };
+
+  const drawCanvas = (pose, video, videoWidth, videoHeight, canvas) => {
+    const ctx = canvas.current.getContext("2d");
+    canvas.current.width = videoWidth;
+    canvas.current.height = videoHeight;
+
+    drawKeypoints(pose["keypoints"], 0.5, ctx);
+    drawSkeleton(pose["keypoints"], 0.5, ctx);
   };
 
   runPosenet();
