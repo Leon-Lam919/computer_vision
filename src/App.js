@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import Webcam from 'react-webcam';
@@ -10,15 +10,21 @@ function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
 
+  const armParts = new Set([
+    'leftShoulder',
+    'rightShoulder',
+    'leftElbow',
+    'rightElbow',
+    'leftWrist',
+    'rightWrist',
+  ]);
+
   const runPosenet = async () => {
     const net = await posenet.load({
       inputResolution: { width: 640, height: 480 },
       scale: 0.5,
     });
-
-    setInterval(() => {
-      detect(net);
-    }, 100);
+    return net;
   };
 
   const detect = async (net) => {
@@ -42,7 +48,10 @@ function App() {
   };
 
   const drawCanvas = (pose, video, videoWidth, videoHeight, canvas) => {
+    if (!canvas?.current) return;
+
     const ctx = canvas.current.getContext('2d');
+    if (!ctx) return;
     canvas.current.width = videoWidth;
     canvas.current.height = videoHeight;
 
@@ -50,7 +59,22 @@ function App() {
     drawSkeleton(pose['keypoints'], 0.5, ctx);
   };
 
-  runPosenet();
+  // sets the interval for the run posenet and updates every 100 ms
+  useEffect(() => {
+    let intervalId;
+    const start = async () => {
+      const net = await runPosenet();
+      intervalId = setInterval(() => {
+        detect(net);
+      }, 100);
+    };
+    start();
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, []);
 
   return (
     <div className="App">

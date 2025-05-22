@@ -26,7 +26,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky install",
-    "check": "eslint . --ext js,jsx && prettier --check .",
+    "check": "eslint . --ext js,jsx && prettier --check . && node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "fix": "eslint . --ext js,jsx --fix && prettier --write ."
   },
   "eslintConfig": {
