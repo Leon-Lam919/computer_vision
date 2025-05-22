@@ -1,0 +1,32 @@
+# File: .github/workflows/quality.yml
+name: Code Quality check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint check
+        run: npm run lint
+
+      - name: Prettier formatting check
+        run: npm run format:check
+
+      - name: Run tests
+        run: npm test
+
