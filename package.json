@@ -2,6 +2,7 @@
   "name": "computer_vision",
   "version": "0.1.0",
   "private": true,
+  "type":"module",
   "dependencies": {
     "@tensorflow-models/posenet": "^2.2.2",
     "@tensorflow/tfjs": "^4.22.0",
@@ -18,7 +19,7 @@
   "scripts": {
     "start": "BROWSER=none NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
     "build": "react-scripts build",
-    "test": "jest",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "eject": "react-scripts eject",
     "lint": "eslint . --ext js,jsx",
     "lint:fix": "eslint . --ext js,jsx --fix",

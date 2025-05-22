@@ -1,4 +1,4 @@
-const { getAngle } = require('./poseMath');
+import { getAngle } from './poseMath';
 
 describe('PoseNet Math - getAngle()', () => {
   it('calculates 90 degrees angle', () => {
