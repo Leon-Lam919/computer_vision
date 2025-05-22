@@ -1,0 +1,19 @@
+# Ignore dependencies
+node_modules/
+
+# Ignore build outputs
+build/
+dist/
+coverage/
+
+# Ignore config files
+.eslintrc.js
+prettier.config.js
+
+# Ignore tests if needed
+*.test.js
+*.spec.js
+
+# Ignore generated files or types
+*.d.ts
+

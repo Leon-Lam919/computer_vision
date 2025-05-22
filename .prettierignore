@@ -1,0 +1,19 @@
+# Ignore node_modules and build outputs
+node_modules/
+build/
+dist/
+coverage/
+
+# Ignore lock files and compiled assets
+package-lock.json
+yarn.lock
+*.min.js
+
+# Ignore generated files
+*.d.ts
+*.generated.js
+
+# Ignore specific folders
+public/
+scripts/
+

@@ -51,16 +51,13 @@ function setDatGuiPropertyCss(propertyText, liCssString, spanCssString = '') {
 }
 
 export function updateTryResNetButtonDatGuiCss() {
-  setDatGuiPropertyCss(
-    tryResNetButtonText, tryResNetButtonBackgroundCss,
-    tryResNetButtonTextCss);
+  setDatGuiPropertyCss(tryResNetButtonText, tryResNetButtonBackgroundCss, tryResNetButtonTextCss);
 }
 
 /**
  * Toggles between the loading UI and the main canvas UI.
  */
-export function toggleLoadingUI(
-  showLoadingUI, loadingDivId = 'loading', mainDivId = 'main') {
+export function toggleLoadingUI(showLoadingUI, loadingDivId = 'loading', mainDivId = 'main') {
   if (showLoadingUI) {
     document.getElementById(loadingDivId).style.display = 'block';
     document.getElementById(mainDivId).style.display = 'none';
@@ -97,13 +94,10 @@ export function drawSegment([ay, ax], [by, bx], color, scale, ctx) {
  * Draws a pose skeleton by looking up all adjacent keypoints/joints
  */
 export function drawSkeleton(keypoints, minConfidence, ctx, scale = 1) {
-  const adjacentKeyPoints =
-    posenet.getAdjacentKeyPoints(keypoints, minConfidence);
+  const adjacentKeyPoints = posenet.getAdjacentKeyPoints(keypoints, minConfidence);
 
   adjacentKeyPoints.forEach((keypoints) => {
-    drawSegment(
-      toTuple(keypoints[0].position), toTuple(keypoints[1].position), color,
-      scale, ctx);
+    drawSegment(toTuple(keypoints[0].position), toTuple(keypoints[1].position), color, scale, ctx);
   });
 }
 
@@ -132,8 +126,11 @@ export function drawBoundingBox(keypoints, ctx) {
   const boundingBox = posenet.getBoundingBox(keypoints);
 
   ctx.rect(
-    boundingBox.minX, boundingBox.minY, boundingBox.maxX - boundingBox.minX,
-    boundingBox.maxY - boundingBox.minY);
+    boundingBox.minX,
+    boundingBox.minY,
+    boundingBox.maxX - boundingBox.minX,
+    boundingBox.maxY - boundingBox.minY
+  );
 
   ctx.strokeStyle = boundingBoxColor;
   ctx.stroke();
@@ -210,4 +207,3 @@ function drawPoints(ctx, points, radius, color) {
  * Read our blog post for a description of PoseNet's offset vector outputs
  * https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5
  */
-
