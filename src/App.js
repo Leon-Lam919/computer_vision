@@ -48,15 +48,15 @@ function App() {
   };
 
   const drawCanvas = (pose, video, videoWidth, videoHeight, canvas) => {
-    if (!canvas?.current) return;
-
     const ctx = canvas.current.getContext('2d');
-    if (!ctx) return;
     canvas.current.width = videoWidth;
     canvas.current.height = videoHeight;
 
-    drawKeypoints(pose['keypoints'], 0.5, ctx);
-    drawSkeleton(pose['keypoints'], 0.5, ctx);
+    const armKeyPoints = pose.keypoints.filter((kp) => armParts.has(kp.part));
+    drawKeypoints(armKeyPoints, 0.5, ctx);
+    drawSkeleton(armKeyPoints, 0.5, ctx);
+    //drawKeypoints(pose['keyPoints'], 0.5, ctx);
+    //drawSkeleton(pose[armParts], 0.5, ctx);
   };
 
   // sets the interval for the run posenet and updates every 100 ms
