@@ -28,19 +28,17 @@ function App() {
   };
 
   const detect = async (net) => {
-    if (
-      typeof webcamRef.current !== 'undefined' &&
-      webcamRef.current !== null &&
-      webcamRef.current.video.readyState === 4
-    ) {
-      const video = webcamRef.current.video;
-      const videoWidth = webcamRef.current.video.videoWidth;
-      const videoHeight = webcamRef.current.video.videoHeight;
+    const webcamCurrent = webcamRef.current;
+    if (webcamCurrent && webcamCurrent.video && webcamCurrent.video.readyState === 4) {
+      const video = webcamCurrent.video;
+      const videoWidth = webcamCurrent.video.videoWidth;
+      const videoHeight = webcamCurrent.video.videoHeight;
 
       webcamRef.current.video.width = videoWidth;
       webcamRef.current.video.height = videoHeight;
 
       const pose = await net.estimateSinglePose(video);
+      console.log('Full pose keypoints:', pose.keypoints);
       console.log(pose);
 
       drawCanvas(pose, video, videoWidth, videoHeight, canvasRef);
@@ -59,28 +57,58 @@ function App() {
     //drawSkeleton(pose[armParts], 0.5, ctx);
   };
 
-  // sets the interval for the run posenet and updates every 100 ms
   useEffect(() => {
-    let intervalId;
-    const start = async () => {
+    let animationFrameId;
+
+    const run = async () => {
       const net = await runPosenet();
-      intervalId = setInterval(() => {
-        detect(net);
+
+      const detectLoop = async () => {
+        await detect(net);
+        animationFrameId = requestAnimationFrame(detectLoop);
+      };
+
+      // Wait until video is ready
+      const waitForVideo = setInterval(() => {
+        const video = webcamRef.current?.video;
+        if (video && video.readyState === 4) {
+          video.play();
+          clearInterval(waitForVideo);
+          detectLoop(); // Start detection
+        }
       }, 100);
     };
-    start();
+
+    run();
+
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      cancelAnimationFrame(animationFrameId);
     };
+  }, []);
+
+  // log to check webcam is working
+  useEffect(() => {
+    const checkWebcam = setInterval(() => {
+      const video = webcamRef.current?.video;
+      if (video) {
+        console.log('Webcam video element found:', video);
+        clearInterval(checkWebcam);
+      }
+    }, 500);
   }, []);
 
   return (
     <div className="App">
       <header className="App-header">
+        <h1> where the video is suppose to be </h1>
         <Webcam
           ref={webcamRef}
+          audio={false}
+          videoConstraints={{
+            width: 640,
+            height: 480,
+            facingMode: 'user',
+          }}
           style={{
             position: 'absolute',
             marginLeft: 'auto',
@@ -93,6 +121,7 @@ function App() {
             height: 480,
           }}
         />
+
         <canvas
           ref={canvasRef}
           style={{
