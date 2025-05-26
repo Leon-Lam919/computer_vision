@@ -1,14 +1,15 @@
 import './App.css';
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import * as posenet from '@tensorflow-models/posenet';
 import Webcam from 'react-webcam';
 import { getAngle } from './utils/poseMath.js';
-import { drawKeypoints, drawSkeleton } from './utils/utilities.js';
+import { drawKeypoints, drawSegment } from './utils/utilities.js';
 
 function App() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
+  const [cameraOn, setCameraOn] = useState(true);
 
   const armParts = new Set([
     'leftShoulder',
@@ -19,6 +20,66 @@ function App() {
     'rightWrist',
   ]);
 
+  const legParts = new Set([
+    'leftHip',
+    'rightHip',
+    'LeftKnee',
+    'rightKnee',
+    'leftAnkle',
+    'rightAnkle',
+    'LeftShoulder',
+    'rightShoulder',
+  ]);
+
+  const drawCustomArms = (keypoints, ctx, minConfidence, color = 'aqua', scale = 1) => {
+    const findKeyPoint = (name) =>
+      keypoints.find((kp) => kp.part === name && kp.score >= minConfidence);
+
+    const drawPair = (aJoint, bJoint) => {
+      const kpA = findKeyPoint(aJoint);
+      const kpB = findKeyPoint(bJoint);
+
+      if (kpA && kpB) {
+        drawSegment(
+          [kpA.position.y, kpA.position.x],
+          [kpB.position.y, kpB.position.x],
+          color,
+          scale,
+          ctx
+        );
+      }
+    };
+    drawPair('leftShoulder', 'rightShoulder');
+    drawPair('leftShoulder', 'leftElbow');
+    drawPair('leftElbow', 'leftWrist');
+    drawPair('rightShoulder', 'rightElbow');
+    drawPair('rightElbow', 'rightWrist');
+  };
+  const drawCustomLegs = (keypoints, ctx, minConfidence, color = 'aqua', scale = 1) => {
+    const findKeyPoint = (name) =>
+      keypoints.find((kp) => kp.part === name && kp.score >= minConfidence);
+
+    const drawPair = (aJoint, bJoint) => {
+      const kpA = findKeyPoint(aJoint);
+      const kpB = findKeyPoint(bJoint);
+
+      if (kpA && kpB) {
+        drawSegment(
+          [kpA.position.y, kpA.position.x],
+          [kpB.position.y, kpB.position.x],
+          color,
+          scale,
+          ctx
+        );
+      }
+    };
+    drawPair('leftShoulder', 'rightShoulder');
+    drawPair('leftHip', 'rightHip');
+    drawPair('leftKnee', 'leftHip');
+    drawPair('leftKnee', 'leftAnkle');
+    drawPair('rightHip', 'rightKnee');
+    drawPair('rightAnkle', 'rightKnee');
+  };
   const runPosenet = async () => {
     const net = await posenet.load({
       inputResolution: { width: 640, height: 480 },
@@ -51,10 +112,9 @@ function App() {
     canvas.current.height = videoHeight;
 
     const armKeyPoints = pose.keypoints.filter((kp) => armParts.has(kp.part));
+    const legKeyPoints = pose.keypoints.filter((kp) => legParts.has(kp.part));
     drawKeypoints(armKeyPoints, 0.5, ctx);
-    drawSkeleton(armKeyPoints, 0.5, ctx);
-    //drawKeypoints(pose['keyPoints'], 0.5, ctx);
-    //drawSkeleton(pose[armParts], 0.5, ctx);
+    drawCustomArms(pose.keypoints, 0.5, ctx);
   };
 
   useEffect(() => {
@@ -99,8 +159,8 @@ function App() {
 
   return (
     <div className="App">
-      <header className="App-header">
-        <h1> where the video is suppose to be </h1>
+      <button> camera off </button>
+      {cameraOn && (
         <Webcam
           ref={webcamRef}
           audio={false}
@@ -121,22 +181,38 @@ function App() {
             height: 480,
           }}
         />
-
-        <canvas
-          ref={canvasRef}
-          style={{
-            position: 'absolute',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            left: 0,
-            right: 0,
-            textAlign: 'center',
-            zIndex: 9,
-            width: 640,
-            height: 480,
-          }}
-        />
-      </header>
+      )}
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'absolute',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          zIndex: 9,
+          width: 640,
+          height: 480,
+        }}
+      />
+      <button
+        onClick={() => setCameraOn((prev) => !prev)}
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 0,
+          zIndex: 10,
+          padding: '10px 20px',
+          backgroundColor: cameraOn ? 'red' : 'green',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+        }}
+      >
+        {cameraOn ? 'Turn Off Camera' : 'Turn On Camera'}
+      </button>
     </div>
   );
 }
