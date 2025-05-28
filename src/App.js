@@ -23,15 +23,28 @@ function App() {
   const legParts = new Set([
     'leftHip',
     'rightHip',
-    'LeftKnee',
+    'leftKnee',
     'rightKnee',
     'leftAnkle',
     'rightAnkle',
-    'LeftShoulder',
+    'leftShoulder',
     'rightShoulder',
   ]);
 
-  const drawCustomArms = (keypoints, ctx, minConfidence, color = 'aqua', scale = 1) => {
+  const deadliftParts = new Set([
+    'rightShoulder',
+    'leftShoulder',
+    'rightHip',
+    'leftHip',
+    'rightKnee',
+    'leftKnee',
+    'rightAnkle',
+    'leftAnkle',
+    'rightWrist',
+    'leftWrist',
+  ]);
+
+  const drawCustomArms = (keypoints, minConfidence, ctx, color = 'aqua', scale = 1) => {
     const findKeyPoint = (name) =>
       keypoints.find((kp) => kp.part === name && kp.score >= minConfidence);
 
@@ -55,7 +68,7 @@ function App() {
     drawPair('rightShoulder', 'rightElbow');
     drawPair('rightElbow', 'rightWrist');
   };
-  const drawCustomLegs = (keypoints, ctx, minConfidence, color = 'aqua', scale = 1) => {
+  const drawCustomLegs = (keypoints, minConfidence, ctx, color = 'aqua', scale = 1) => {
     const findKeyPoint = (name) =>
       keypoints.find((kp) => kp.part === name && kp.score >= minConfidence);
 
@@ -112,9 +125,12 @@ function App() {
     canvas.current.height = videoHeight;
 
     const armKeyPoints = pose.keypoints.filter((kp) => armParts.has(kp.part));
-    const legKeyPoints = pose.keypoints.filter((kp) => legParts.has(kp.part));
     drawKeypoints(armKeyPoints, 0.5, ctx);
     drawCustomArms(pose.keypoints, 0.5, ctx);
+
+    const legKeyPoints = pose.keypoints.filter((kp) => legParts.has(kp.part));
+    drawKeypoints(legKeyPoints, 0.5, ctx);
+    drawCustomLegs(pose.keypoints, 0.5, ctx);
   };
 
   useEffect(() => {
@@ -173,6 +189,7 @@ function App() {
             position: 'absolute',
             marginLeft: 'auto',
             marginRight: 'auto',
+            marginTop: 100,
             left: 0,
             right: 0,
             textAlign: 'center',
